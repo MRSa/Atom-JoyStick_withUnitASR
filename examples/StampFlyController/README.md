@@ -17,3 +17,8 @@ fastled/FastLED @ ^3.7.0
 lvgl @ ^8.3.10
 
 M5AtomS3 @ ^0.0.3
+
+-----
+
+Modify the Atom-JoyStick to accept control commands from Unit ASR.
+(Under development)

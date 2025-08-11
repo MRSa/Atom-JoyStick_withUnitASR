@@ -43,6 +43,9 @@
 
 #include "app_lvgl.h"
 
+// ----- for GOKIGEN UnitASR
+#include "gokigen_unit_asr.hpp"
+
 M5GFX display;
 
 TaskHandle_t task_tone_handle = NULL;
@@ -446,6 +449,11 @@ void setup() {
     esp_now_get_version(&espnow_version);
     USBSerial.printf("Version %d\n", espnow_version);
 
+    // ----- Unit ASRの初期化と起動アナウンス
+    prepareUnitASR();
+    asr.sendComandNum(0xfe);  // 起動アナウンス
+    delay(500);
+
     // 割り込み設定
     timer = timerBegin(1, 80, true);
     timerAttachInterrupt(timer, &onTimer, true);
@@ -519,8 +527,24 @@ void loop() {
     etime     = stime;
     stime     = micros();
     dtime     = stime - etime;
+
+    asr.update();
     M5.update();
     joy_update();
+
+    // ----- apply Unit ASR Control
+    if (is_fly_flag)
+    {
+        if (!isConnectedCalled)
+        {
+            // ----- StampFlyとの接続を検出
+            isConnectedCalled = true;
+            
+            // ----- 接続アナウンス
+            onConnectedAnnounce();
+        }
+    }
+
 
     // Stop Watch Start&Stop&Reset
     if (M5.Btn.wasPressed() == true) {
@@ -547,6 +571,25 @@ void loop() {
     _phi      = getAileron();
     _theta    = getElevator();
     _psi      = getRudder();
+
+
+    // ----- apply Unit ASR Control
+    if (isHandleTakeoff)
+    {
+        // ----- 離陸
+        isHandleLanding = false;
+        isHandleTakeoff = false;
+        auto_up_down_status = 1;
+        fly_status = 1;
+    }
+    if (isHandleLanding)
+    {
+        // ----- 着陸
+        isHandleLanding = false;
+        isHandleTakeoff = false;
+        auto_up_down_status = 1;
+        fly_status = 0;
+    }
 
     if (auto_up_down_status && (page_nums == PAGE_RUNNING)) {
         // Throttle_bias = _throttle;
