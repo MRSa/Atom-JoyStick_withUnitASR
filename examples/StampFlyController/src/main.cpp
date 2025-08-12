@@ -544,7 +544,11 @@ void loop() {
             onConnectedAnnounce();
         }
     }
-
+    else
+    {
+        // --- StampFlyと切断されている
+        isConnectedCalled = false;
+    }
 
     // Stop Watch Start&Stop&Reset
     if (M5.Btn.wasPressed() == true) {
@@ -581,6 +585,7 @@ void loop() {
         isHandleTakeoff = false;
         auto_up_down_status = 1;
         fly_status = 1;
+        is_fly_flag = 1;
     }
     if (isHandleLanding)
     {
@@ -589,6 +594,7 @@ void loop() {
         isHandleTakeoff = false;
         auto_up_down_status = 1;
         fly_status = 0;
+        is_fly_flag = 1;
     }
 
     if (auto_up_down_status && (page_nums == PAGE_RUNNING)) {
