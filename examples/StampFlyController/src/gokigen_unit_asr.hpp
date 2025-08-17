@@ -3,7 +3,7 @@
 #include <unit_asr.hpp>
 
 #define ASR_INPUT_LIMIT_LOW  0x0780
-#define ASR_INPUT_LIMIT_HIGH 0x0900
+#define ASR_INPUT_LIMIT_HIGH 0x0980
 
 #define ASR_OUTPUT_COUNT_SHORT  50
 #define ASR_OUTPUT_COUNT_LONG  100
