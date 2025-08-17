@@ -625,7 +625,7 @@ void loop() {
     }
 
     //// ----- デバッグ用ダンプコード
-    //  USBSerial.printf("STICK:%03X:%03X:%03X:%03X\n", _throttle, _phi, _theta, _psi);
+    // USBSerial.printf("STICK:%03X:%03X:%03X:%03X\n", _throttle, _phi, _theta, _psi);
 
     if (isHandleTakeoff)
     {

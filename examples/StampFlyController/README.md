@@ -18,7 +18,8 @@ lvgl @ ^8.3.10
 
 M5AtomS3 @ ^0.0.3
 
+m5stack/M5UnitASR @ ^0.0.1
+
 -----
 
-Modify the Atom-JoyStick to accept control commands from Unit ASR.
-(Under development)
+Modify the Atom-JoyStick to accept control commands from [Unit ASR](https://docs.m5stack.com/en/unit/Unit%20ASR).
