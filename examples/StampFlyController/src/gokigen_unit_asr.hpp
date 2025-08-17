@@ -1,10 +1,41 @@
 /* GOKIGEN Unit ASR */
 
 #include <unit_asr.hpp>
+
+#define ASR_INPUT_LIMIT_LOW  0x0780
+#define ASR_INPUT_LIMIT_HIGH 0x0900
+
+#define ASR_OUTPUT_COUNT_SHORT  50
+#define ASR_OUTPUT_COUNT_LONG  100
+
+#define ASR_OUTPUT_COUNT_TURN_S 25
+#define ASR_OUTPUT_COUNT_TURN   50
+
+#define ASR_OUTPUT_BIG_LOW   0x0100
+#define ASR_OUTPUT_BIG_HIGH  0x0e00
+#define ASR_OUTPUT_MID_LOW   0x0400
+#define ASR_OUTPUT_MID_HIGH  0x0c00
+#define ASR_OUTPUT_IDLE      0x0800
+
 ASRUnit asr;
 bool isConnectedCalled = false;
 bool isHandleTakeoff = false;
 bool isHandleLanding = false;
+
+uint8_t moveUpDownCounter = 0;
+uint16_t moveUpDownValue = 0;
+
+uint8_t moveLeftRightCounter = 0;
+uint16_t moveLeftRightValue = 0;
+
+uint8_t moveForwardBackCounter = 0;
+uint16_t moveForwardBackValue = 0;
+
+uint8_t moveCwCcwCounter = 0;
+uint16_t moveCwCcwValue = 0;
+
+uint8_t moveIdleCounter = 0;
+uint16_t moveIdleValue = 0;
 
 void onConnectedAnnounce()
 {
@@ -34,123 +65,158 @@ void landHandler()
     displayMessage("着陸!", TFT_ORANGE);
 }
 
-void up40Handler()
+void upShortHandler()
 {
-    displayMessage("上昇 40", TFT_LIGHTGRAY);
+    displayMessage("上昇 短", TFT_LIGHTGRAY);
+    moveUpDownCounter = ASR_OUTPUT_COUNT_SHORT;
+    moveUpDownValue = ASR_OUTPUT_MID_LOW;
 }
 
-void down40Handler()
+void downShortHandler()
 {
-    displayMessage("下降 40", TFT_LIGHTGRAY);
+    displayMessage("下降 短", TFT_LIGHTGRAY);
+    moveUpDownCounter = ASR_OUTPUT_COUNT_SHORT;
+    moveUpDownValue = ASR_OUTPUT_MID_HIGH;
 }
 
-void right40Handler()
+void leftShortHandler()
 {
-    displayMessage("右移動 40", TFT_LIGHTGRAY);
+    displayMessage("左移動 短", TFT_LIGHTGRAY);
+    moveLeftRightCounter = ASR_OUTPUT_COUNT_SHORT;
+    moveLeftRightValue = ASR_OUTPUT_MID_LOW;
 }
 
-void left40Handler()
+void rightShortHandler()
 {
-    displayMessage("左移動 40", TFT_LIGHTGRAY);
+    displayMessage("右移動 短", TFT_LIGHTGRAY);
+    moveLeftRightCounter = ASR_OUTPUT_COUNT_SHORT;
+    moveLeftRightValue = ASR_OUTPUT_MID_HIGH;
 }
 
-void forward40Handler()
+void forwardShortHandler()
 {
-    displayMessage("前進 40", TFT_LIGHTGRAY);
+    displayMessage("前進 短", TFT_LIGHTGRAY);
+    moveForwardBackCounter = ASR_OUTPUT_COUNT_SHORT;
+    moveForwardBackValue = ASR_OUTPUT_MID_LOW;
 }
 
-void back40Handler()
+void backShortHandler()
 {
-    displayMessage("後退 40", TFT_LIGHTGRAY);
+    displayMessage("後退 短", TFT_LIGHTGRAY);
+    moveForwardBackCounter = ASR_OUTPUT_COUNT_SHORT;
+    moveForwardBackValue = ASR_OUTPUT_MID_HIGH;
 }
 
-void cw45Handler()
+void ccwShortHandler()
 {
-    displayMessage("右回り 45度", TFT_LIGHTGRAY);
+    displayMessage("左回り 短", TFT_LIGHTGRAY);
+    moveCwCcwCounter = ASR_OUTPUT_COUNT_TURN_S;
+    moveCwCcwValue = ASR_OUTPUT_MID_LOW;
 }
 
-void ccw45Handler()
+void cwShortHandler()
 {
-    displayMessage("左回り 45度", TFT_LIGHTGRAY);
+    displayMessage("右回り 短", TFT_LIGHTGRAY);
+    moveCwCcwCounter = ASR_OUTPUT_COUNT_TURN_S;
+    moveCwCcwValue = ASR_OUTPUT_MID_HIGH;
 }
 
-void up100Handler()
+void upLongHandler()
 {
-    displayMessage("上昇 100", TFT_WHITE);
+    displayMessage("上昇 長", TFT_WHITE);
+    moveUpDownCounter = ASR_OUTPUT_COUNT_LONG;
+    moveUpDownValue = ASR_OUTPUT_MID_LOW;
 }
 
-void down100Handler()
+void downLongHandler()
 {
-    displayMessage("下降 100", TFT_WHITE);
+    displayMessage("下降 長", TFT_WHITE);
+    moveUpDownCounter = ASR_OUTPUT_COUNT_LONG;
+    moveUpDownValue = ASR_OUTPUT_MID_HIGH;
 }
 
-void right100Handler()
+void leftLongHandler()
 {
-    displayMessage("右移動 100", TFT_WHITE);
+    displayMessage("左移動 長", TFT_WHITE);
+    moveLeftRightCounter = ASR_OUTPUT_COUNT_LONG;
+    moveLeftRightValue = ASR_OUTPUT_MID_LOW;
 }
 
-void left100Handler()
+void rightLongHandler()
 {
-    displayMessage("左移動 100", TFT_WHITE);
+    displayMessage("右移動 長", TFT_WHITE);
+    moveLeftRightCounter = ASR_OUTPUT_COUNT_LONG;
+    moveLeftRightValue = ASR_OUTPUT_MID_HIGH;
 }
 
-void forward100Handler()
+void forwardLongHandler()
 {
-    displayMessage("前進 100", TFT_WHITE);
+    displayMessage("前進 長", TFT_WHITE);
+    moveForwardBackCounter = ASR_OUTPUT_COUNT_LONG;
+    moveForwardBackValue = ASR_OUTPUT_MID_LOW;
 }
 
-void back100Handler()
+void backLongHandler()
 {
-    displayMessage("後退 100", TFT_WHITE);
+    displayMessage("後退 長", TFT_WHITE);
+    moveForwardBackCounter = ASR_OUTPUT_COUNT_LONG;
+    moveForwardBackValue = ASR_OUTPUT_MID_HIGH;
 }
 
-void cw90Handler()
+void ccwLongHandler()
 {
-    displayMessage("右回り 90度", TFT_WHITE);
+    displayMessage("左回り 長", TFT_WHITE);
+    moveCwCcwCounter = ASR_OUTPUT_COUNT_TURN;
+    moveCwCcwValue = ASR_OUTPUT_MID_LOW;
 }
 
-void ccw90Handler()
+void cwLongHandler()
 {
-    displayMessage("左回り 90度", TFT_WHITE);
+    displayMessage("右回り 長", TFT_WHITE);
+    moveCwCcwCounter = ASR_OUTPUT_COUNT_TURN;
+    moveCwCcwValue = ASR_OUTPUT_MID_HIGH;
 }
 
-void sendSpeedCommand(int currentSpeed = 100)
+void stopHandler()
 {
-    char cmd[16];
-    char disp[24];
-    sprintf(disp, "速度 %d", currentSpeed);
-    sprintf(cmd, "speed %d", currentSpeed);
-    displayMessage(disp, TFT_WHITE);
-}
+    displayMessage("停止", TFT_WHITE);
+    
+    moveIdleCounter = ASR_OUTPUT_COUNT_LONG; // ASR_OUTPUT_COUNT_SHORT;
+    moveIdleValue = ASR_OUTPUT_IDLE;
 
-void incSpeedHandler()
-{
-    sendSpeedCommand(75);
-}
+    // ---- ASRからの動作要求をリセット
+    moveUpDownCounter = 0;
+    moveUpDownValue = 0;
 
-void decSpeedHandler()
-{
-    sendSpeedCommand(25);
-}
+    moveLeftRightCounter = 0;
+    moveLeftRightValue = 0;
 
-void maxSpeedHandler()
-{
-    sendSpeedCommand(100);
-}
+    moveForwardBackCounter = 0;
+    moveForwardBackValue = 0;
 
-void midSpeedHandler()
-{
-    sendSpeedCommand(55);
-}
-
-void minSpeedHandler()
-{
-    sendSpeedCommand(10);
+    moveCwCcwCounter = 0;
+    moveCwCcwValue = 0;
 }
 
 void emergencyHandler()
 {
     displayMessage("緊急停止!", TFT_ORANGE);
+
+    // ---- ASRからの動作要求をクリア (アイドルも含む)
+    moveIdleCounter = 0;
+    moveIdleValue = 0;
+
+    moveUpDownCounter = 0;
+    moveUpDownValue = 0;
+
+    moveLeftRightCounter = 0;
+    moveLeftRightValue = 0;
+
+    moveForwardBackCounter = 0;
+    moveForwardBackValue = 0;
+
+    moveCwCcwCounter = 0;
+    moveCwCcwValue = 0;
 }
 
 void connectedHandler()
@@ -195,14 +261,14 @@ void prepareUnitASR()
     asr.addCommandWord(0x27, "seven",receiveHandler);
     asr.addCommandWord(0x28, "eight",receiveHandler);
     asr.addCommandWord(0x29, "nine",receiveHandler);
-    asr.addCommandWord(0x30, "ok",receiveHandler);
+    asr.addCommandWord(0x30, "ok",stopHandler);
     asr.addCommandWord(0x31, "hi_ASR",receiveHandler);
     asr.addCommandWord(0x32, "hello",receiveHandler);
-    asr.addCommandWord(0x40, "increase_speed",incSpeedHandler);
-    asr.addCommandWord(0x41, "decrease_speed",decSpeedHandler);
-    asr.addCommandWord(0x42, "maximum_speed",maxSpeedHandler);
-    asr.addCommandWord(0x43, "medium_speed",midSpeedHandler);
-    asr.addCommandWord(0x44, "minimum_speed",minSpeedHandler);
+    asr.addCommandWord(0x40, "increase_speed",receiveHandler);
+    asr.addCommandWord(0x41, "decrease_speed",receiveHandler);
+    asr.addCommandWord(0x42, "maximum_speed",receiveHandler);
+    asr.addCommandWord(0x43, "medium_speed",receiveHandler);
+    asr.addCommandWord(0x44, "minimum_speed",receiveHandler);
     asr.addCommandWord(0x45, "fw_version",receiveHandler);
     asr.addCommandWord(0x46, "out_finished",receiveHandler);
     asr.addCommandWord(0x47, "out_started",receiveHandler);
@@ -240,22 +306,22 @@ void prepareUnitASR()
     asr.addCommandWord(0x68, "status",receiveHandler);
     asr.addCommandWord(0x69, "time",receiveHandler);
     asr.addCommandWord(0x6a, "remain",receiveHandler);
-    asr.addCommandWord(0x71, "up 70",up40Handler);
-    asr.addCommandWord(0x72, "down 70",down40Handler);
-    asr.addCommandWord(0x73, "right 70",right40Handler);
-    asr.addCommandWord(0x74, "left 70",left40Handler);
-    asr.addCommandWord(0x75, "forward 70",forward40Handler);
-    asr.addCommandWord(0x76, "back 70",back40Handler);
-    asr.addCommandWord(0x77, "ccw 45",ccw45Handler);
-    asr.addCommandWord(0x78, "cw 45",cw45Handler);
-    asr.addCommandWord(0x81, "up 150",up100Handler);
-    asr.addCommandWord(0x82, "down 150",down100Handler);
-    asr.addCommandWord(0x83, "right 150",right100Handler);
-    asr.addCommandWord(0x84, "left 150",left100Handler);
-    asr.addCommandWord(0x85, "forward 150",forward100Handler);
-    asr.addCommandWord(0x86, "back 150",back100Handler);
-    asr.addCommandWord(0x87, "ccw 90",ccw90Handler);
-    asr.addCommandWord(0x88, "cw 90",cw90Handler);
+    asr.addCommandWord(0x71, "up 70",upShortHandler);
+    asr.addCommandWord(0x72, "down 70",downShortHandler);
+    asr.addCommandWord(0x73, "right 70",rightShortHandler);
+    asr.addCommandWord(0x74, "left 70",leftShortHandler);
+    asr.addCommandWord(0x75, "forward 70",forwardShortHandler);
+    asr.addCommandWord(0x76, "back 70",backShortHandler);
+    asr.addCommandWord(0x77, "ccw 45",ccwShortHandler);
+    asr.addCommandWord(0x78, "cw 45",cwShortHandler);
+    asr.addCommandWord(0x81, "up 150",upLongHandler);
+    asr.addCommandWord(0x82, "down 150",downLongHandler);
+    asr.addCommandWord(0x83, "right 150",rightLongHandler);
+    asr.addCommandWord(0x84, "left 150",leftLongHandler);
+    asr.addCommandWord(0x85, "forward 150",forwardLongHandler);
+    asr.addCommandWord(0x86, "back 150",backLongHandler);
+    asr.addCommandWord(0x87, "ccw 90",ccwLongHandler);
+    asr.addCommandWord(0x88, "cw 90",cwLongHandler);
     asr.addCommandWord(0x91, "out_100",receiveHandler);
     asr.addCommandWord(0x92, "out_1000",receiveHandler);
     asr.addCommandWord(0x93, "out_degree",receiveHandler);
