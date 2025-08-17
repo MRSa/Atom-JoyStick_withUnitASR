@@ -532,7 +532,7 @@ void loop() {
     M5.update();
     joy_update();
 
-    // ----- apply Unit ASR Control
+    // ----- Unit ASRによる接続完了フィードバック
     if (is_fly_flag)
     {
         if (!isConnectedCalled)
@@ -544,7 +544,11 @@ void loop() {
             onConnectedAnnounce();
         }
     }
-
+    else
+    {
+        // --- StampFlyと切断されている
+        isConnectedCalled = false;
+    }
 
     // Stop Watch Start&Stop&Reset
     if (M5.Btn.wasPressed() == true) {
@@ -572,8 +576,57 @@ void loop() {
     _theta    = getElevator();
     _psi      = getRudder();
 
+    // ----- Unit ASRからのコマンド制御
+    //   (ジョイスティックの入力がなかった場合、Unit ASRからの制御を反映)
+    if (moveUpDownCounter > 0)
+    {
+        // --- 上昇・下降 (Throttle)
+        moveUpDownCounter--;
+        if ((_throttle >= ASR_INPUT_LIMIT_LOW)&&(_throttle <= ASR_INPUT_LIMIT_HIGH))
+        {
+            _throttle = moveUpDownValue;
+        }
+    }
+    if (moveLeftRightCounter > 0)
+    {
+        // --- 左移動・右移動 (Aileron)
+        moveLeftRightCounter--;
+        if ((_phi >= ASR_INPUT_LIMIT_LOW)&&(_phi <= ASR_INPUT_LIMIT_HIGH))
+        {
+            _phi = moveLeftRightValue;
+        }
+    }
+    if (moveForwardBackCounter > 0)
+    {
+        // --- 前進・後退 (Elevator)
+        moveForwardBackCounter--;
+        if ((_theta >= ASR_INPUT_LIMIT_LOW)&&(_theta <= ASR_INPUT_LIMIT_HIGH))
+        {
+            _theta = moveForwardBackValue;
+        }
+    }
+    if (moveCwCcwCounter > 0)
+    {
+        // --- 左旋回・右旋回 (Rudder)
+        moveCwCcwCounter--;
+        if ((_psi >= ASR_INPUT_LIMIT_LOW)&&(_psi <= ASR_INPUT_LIMIT_HIGH))
+        {
+            _psi = moveCwCcwValue;
+        }
+    }
+    if (moveIdleCounter > 0)
+    {
+        // --- コマンド入力抑止 (この時だけは、Joystickの制御を無効化する)
+        moveIdleCounter--;
+        _throttle = moveIdleValue;
+        _phi      = moveIdleValue;
+        _theta    = moveIdleValue;
+        _psi      = moveIdleValue;
+    }
 
-    // ----- apply Unit ASR Control
+    //// ----- デバッグ用ダンプコード
+    //  USBSerial.printf("STICK:%03X:%03X:%03X:%03X\n", _throttle, _phi, _theta, _psi);
+
     if (isHandleTakeoff)
     {
         // ----- 離陸
@@ -581,6 +634,7 @@ void loop() {
         isHandleTakeoff = false;
         auto_up_down_status = 1;
         fly_status = 1;
+        is_fly_flag = 1;
     }
     if (isHandleLanding)
     {
@@ -589,6 +643,7 @@ void loop() {
         isHandleTakeoff = false;
         auto_up_down_status = 1;
         fly_status = 0;
+        is_fly_flag = 1;
     }
 
     if (auto_up_down_status && (page_nums == PAGE_RUNNING)) {
