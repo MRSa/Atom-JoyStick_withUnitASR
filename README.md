@@ -11,5 +11,5 @@ Contains case programs of M5Stack Atom-JoyStick.
 
 -----
 
-Modify the Atom-JoyStick to accept control commands from Unit ASR.
-(Under development)
+Modify the Atom-JoyStick to accept control commands from [Unit ASR](https://docs.m5stack.com/en/unit/Unit%20ASR).
+(in the ['examples/StampFlyController'](examples/StampFlyController/) folder.)
