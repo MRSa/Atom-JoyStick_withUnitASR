@@ -1,4 +1,6 @@
 /* GOKIGEN Unit ASR */
+#ifndef GOKIGEN_UNIT_ASR
+#define GOKIGEN_UNIT_ASR
 
 #include <unit_asr.hpp>
 
@@ -35,7 +37,6 @@ uint8_t moveCwCcwCounter = 0;
 uint16_t moveCwCcwValue = 0;
 
 uint8_t moveIdleCounter = 0;
-uint16_t moveIdleValue = 0;
 
 void onConnectedAnnounce()
 {
@@ -182,7 +183,6 @@ void stopHandler()
     displayMessage("停止", TFT_WHITE);
     
     moveIdleCounter = ASR_OUTPUT_COUNT_LONG; // ASR_OUTPUT_COUNT_SHORT;
-    moveIdleValue = ASR_OUTPUT_IDLE;
 
     // ---- ASRからの動作要求をリセット
     moveUpDownCounter = 0;
@@ -204,7 +204,6 @@ void emergencyHandler()
 
     // ---- ASRからの動作要求をクリア (アイドルも含む)
     moveIdleCounter = 0;
-    moveIdleValue = 0;
 
     moveUpDownCounter = 0;
     moveUpDownValue = 0;
@@ -239,7 +238,6 @@ void receiveHandler()
     USBSerial.printf("Not support command received!\n");
     displayMessage("(命令受信)", TFT_LIGHTGREY);
 }
-
 
 void prepareUnitASR()
 {
@@ -339,4 +337,120 @@ void prepareUnitASR()
     asr.addCommandWord(0xff, "hi_m_five",receiveHandler);
 
     USBSerial.printf("--- Done initialize. ---\n");
+
+    asr.sendComandNum(0xfe);  // 起動アナウンス
+    delay(500);
 }
+
+void checkConnectedUnitASR()
+{
+
+    if (is_fly_flag)
+    {
+        if (!isConnectedCalled)
+        {
+            // ----- StampFlyとの接続を検出
+            isConnectedCalled = true;
+            
+            // ----- 接続アナウンス
+            onConnectedAnnounce();
+        }
+    }
+    else
+    {
+        // --- StampFlyと切断されている
+        isConnectedCalled = false;
+    }
+}
+
+void checkTakeOffOrLandingUnitASR()
+{
+    if (isHandleTakeoff)
+    {
+        // ----- 離陸
+        isHandleLanding = false;
+        isHandleTakeoff = false;
+        auto_up_down_status = 1;
+        fly_status = 1;
+        is_fly_flag = 1;
+    }
+    if (isHandleLanding)
+    {
+        // ----- 着陸
+        isHandleLanding = false;
+        isHandleTakeoff = false;
+        auto_up_down_status = 1;
+        fly_status = 0;
+        is_fly_flag = 1;
+    }
+}
+
+uint16_t overrideThrottleUnitASR(uint16_t throttle)
+{
+    //   (ジョイスティックの入力がなかった場合、Unit ASRからの制御を反映)
+    if (moveUpDownCounter > 0)
+    {
+        // --- 上昇・下降 (Throttle)
+        moveUpDownCounter--;
+        if ((throttle >= ASR_INPUT_LIMIT_LOW)&&(throttle <= ASR_INPUT_LIMIT_HIGH))
+        {
+            return moveUpDownValue;
+        }
+    }
+    return throttle;
+}
+
+uint16_t overrideAileronUnitASR(uint16_t aileron)
+{
+    if (moveLeftRightCounter > 0)
+    {
+        // --- 左移動・右移動 (Aileron)
+        moveLeftRightCounter--;
+        if ((aileron >= ASR_INPUT_LIMIT_LOW)&&(aileron <= ASR_INPUT_LIMIT_HIGH))
+        {
+            return moveLeftRightValue;
+        }
+    }
+    return aileron;
+}
+
+uint16_t overrideElevatorUnitASR(uint16_t elevator)
+{
+    if (moveForwardBackCounter > 0)
+    {
+        // --- 前進・後退 (Elevator)
+        moveForwardBackCounter--;
+        if ((elevator >= ASR_INPUT_LIMIT_LOW)&&(elevator <= ASR_INPUT_LIMIT_HIGH))
+        {
+            return moveForwardBackValue;
+        }
+    }
+    return elevator;
+}
+
+uint16_t overrideRudderUnitASR(uint16_t rudder)
+{
+    if (moveCwCcwCounter > 0)
+    {
+        // --- 左旋回・右旋回 (Rudder)
+        moveCwCcwCounter--;
+        if ((rudder >= ASR_INPUT_LIMIT_LOW)&&(rudder <= ASR_INPUT_LIMIT_HIGH))
+        {
+            return moveCwCcwValue;
+        }
+    }
+    return rudder;
+}
+
+bool isHoldCommandUnitASR()
+{
+    return (moveIdleCounter > 0);
+}
+
+uint16_t getHoldInputValue()
+{
+    moveIdleCounter--;
+    return ASR_OUTPUT_IDLE;
+}
+
+#endif
