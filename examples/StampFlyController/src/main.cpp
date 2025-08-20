@@ -43,8 +43,10 @@
 
 #include "app_lvgl.h"
 
+#ifdef USE_UNIT_ASR_CONTROL
 // ----- for GOKIGEN UnitASR
 #include "gokigen_unit_asr.hpp"
+#endif // #ifdef USE_UNIT_ASR_CONTROL
 
 M5GFX display;
 
@@ -449,8 +451,10 @@ void setup() {
     esp_now_get_version(&espnow_version);
     USBSerial.printf("Version %d\n", espnow_version);
 
+#ifdef USE_UNIT_ASR_CONTROL
     // ----- Unit ASRの初期化と起動アナウンス (GOKIGEN)
     prepareUnitASR();
+#endif // #ifdef USE_UNIT_ASR_CONTROL
 
     // 割り込み設定
     timer = timerBegin(1, 80, true);
@@ -528,9 +532,11 @@ void loop() {
     M5.update();
     joy_update();
 
+#ifdef USE_UNIT_ASR_CONTROL
     // ----- Unit ASRによる接続完了フィードバック (GOKIGEN)
     asr.update();
     checkConnectedUnitASR();
+#endif // #ifdef USE_UNIT_ASR_CONTROL
 
     // Stop Watch Start&Stop&Reset
     if (M5.Btn.wasPressed() == true) {
@@ -558,6 +564,7 @@ void loop() {
     _theta    = getElevator();
     _psi      = getRudder();
 
+#ifdef USE_UNIT_ASR_CONTROL
     // ----- GOKIGEN: Unit ASRからのコマンド制御 (ここから) -----
     _throttle = overrideThrottleUnitASR(_throttle);
     _phi      = overrideAileronUnitASR(_phi);
@@ -574,6 +581,7 @@ void loop() {
     }
     checkTakeOffOrLandingUnitASR();
     // ----- GOKIGEN: Unit ASRからのコマンド制御 (ここまで) -----
+#endif  // #ifdef USE_UNIT_ASR_CONTROL
 
     if (auto_up_down_status && (page_nums == PAGE_RUNNING)) {
         // Throttle_bias = _throttle;
