@@ -23,6 +23,7 @@ ASRUnit asr;
 bool isConnectedCalled = false;
 bool isHandleTakeoff = false;
 bool isHandleLanding = false;
+bool isCleanJoystickInput = false;
 
 uint8_t moveUpDownCounter = 0;
 uint16_t moveUpDownValue = 0;
@@ -178,6 +179,18 @@ void cwLongHandler()
     moveCwCcwValue = ASR_OUTPUT_MID_HIGH;
 }
 
+void inputCleanHander()
+{
+    displayMessage("入力クリーン", TFT_WHITE);
+    isCleanJoystickInput = true;
+}
+
+void inputCleanClearHander()
+{
+    displayMessage("入力クリーン解除", TFT_WHITE);
+    isCleanJoystickInput = false;
+}
+
 void stopHandler()
 {
     displayMessage("停止", TFT_WHITE);
@@ -260,8 +273,8 @@ void prepareUnitASR()
     asr.addCommandWord(0x28, "eight",receiveHandler);
     asr.addCommandWord(0x29, "nine",receiveHandler);
     asr.addCommandWord(0x30, "ok",stopHandler);
-    asr.addCommandWord(0x31, "hi_ASR",receiveHandler);
-    asr.addCommandWord(0x32, "hello",receiveHandler);
+    asr.addCommandWord(0x31, "hi_ASR",inputCleanClearHander);
+    asr.addCommandWord(0x32, "hello",inputCleanHander);
     asr.addCommandWord(0x40, "increase_speed",receiveHandler);
     asr.addCommandWord(0x41, "decrease_speed",receiveHandler);
     asr.addCommandWord(0x42, "maximum_speed",receiveHandler);
@@ -397,6 +410,14 @@ uint16_t overrideThrottleUnitASR(uint16_t throttle)
             return moveUpDownValue;
         }
     }
+    else if (isCleanJoystickInput)
+    {
+        // ----- ジョイスティックの微妙な入力をクリーンにする
+        if ((throttle >= ASR_INPUT_LIMIT_LOW)&&(throttle <= ASR_INPUT_LIMIT_HIGH))
+        {
+            return ASR_OUTPUT_IDLE;
+        }
+    }
     return throttle;
 }
 
@@ -409,6 +430,14 @@ uint16_t overrideAileronUnitASR(uint16_t aileron)
         if ((aileron >= ASR_INPUT_LIMIT_LOW)&&(aileron <= ASR_INPUT_LIMIT_HIGH))
         {
             return moveLeftRightValue;
+        }
+    }
+    else if (isCleanJoystickInput)
+    {
+        // ----- ジョイスティックの微妙な入力をクリーンにする
+        if ((aileron >= ASR_INPUT_LIMIT_LOW)&&(aileron <= ASR_INPUT_LIMIT_HIGH))
+        {
+            return ASR_OUTPUT_IDLE;
         }
     }
     return aileron;
@@ -425,6 +454,14 @@ uint16_t overrideElevatorUnitASR(uint16_t elevator)
             return moveForwardBackValue;
         }
     }
+    else if (isCleanJoystickInput)
+    {
+        // ----- ジョイスティックの微妙な入力をクリーンにする
+        if ((elevator >= ASR_INPUT_LIMIT_LOW)&&(elevator <= ASR_INPUT_LIMIT_HIGH))
+        {
+            return ASR_OUTPUT_IDLE;
+        }
+    }    
     return elevator;
 }
 
@@ -437,6 +474,14 @@ uint16_t overrideRudderUnitASR(uint16_t rudder)
         if ((rudder >= ASR_INPUT_LIMIT_LOW)&&(rudder <= ASR_INPUT_LIMIT_HIGH))
         {
             return moveCwCcwValue;
+        }
+    }
+    else if (isCleanJoystickInput)
+    {
+        // ----- ジョイスティックの微妙な入力をクリーンにする
+        if ((rudder >= ASR_INPUT_LIMIT_LOW)&&(rudder <= ASR_INPUT_LIMIT_HIGH))
+        {
+            return ASR_OUTPUT_IDLE;
         }
     }
     return rudder;
